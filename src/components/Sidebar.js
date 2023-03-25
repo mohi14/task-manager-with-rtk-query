@@ -1,19 +1,25 @@
 import React from 'react';
+import { useGetProjectsQuery } from '../features/projects/projectsApi';
+import { useGetTeamMemberQuery } from '../features/teamMember/teamMemberApi';
 import ProjectList from './ProjectList';
 import TeamMember from './TeamMember';
 
 const Sidebar = () => {
+    const { data: projects, isLoading, isError, error } = useGetProjectsQuery()
+    console.log(projects)
+    const { data: teams } = useGetTeamMemberQuery()
+    console.log(teams)
     return (
         <div className="sidebar">
 
             <div>
                 <h3 className="text-xl font-bold">Projects</h3>
                 <div className="mt-3 space-y-4">
-                    <ProjectList></ProjectList>
-                    <ProjectList></ProjectList>
-                    <ProjectList></ProjectList>
-                    <ProjectList></ProjectList>
-                    <ProjectList></ProjectList>
+                    {isLoading && !isError && <div>Loading....</div>}
+                    {!isLoading && isError && <div>{error}</div>}
+                    {!isLoading && !isError && projects?.length === 0 && <div>No Project Found</div>}
+                    {!isLoading && !isError && projects.length > 0 && projects.map((project, idx) => <ProjectList key={idx} project={project}></ProjectList>)}
+
                 </div>
             </div>
 
@@ -21,17 +27,12 @@ const Sidebar = () => {
             <div className="mt-8">
                 <h3 className="text-xl font-bold">Team Members</h3>
                 <div className="mt-3 space-y-4">
-                    <TeamMember></TeamMember>
-                    <TeamMember></TeamMember>
-                    <TeamMember></TeamMember>
-                    <TeamMember></TeamMember>
-                    <TeamMember></TeamMember>
-                    <TeamMember></TeamMember>
-                    <TeamMember></TeamMember>
-                    <TeamMember></TeamMember>
+                    {teams?.length === 0 && <div>No Teams Found</div>}
+                    {teams && teams.length > 0 && teams.map((team, idx) => <TeamMember key={idx} team={team}></TeamMember>)}
+
                 </div>
             </div>
-        </div>
+        </div >
     );
 };
 
