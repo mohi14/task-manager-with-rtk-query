@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAddTaskMutation } from '../features/addTask/addTaskApi';
 import { useGetProjectsQuery } from '../features/projects/projectsApi';
 import { useGetTeamMemberQuery } from '../features/teamMember/teamMemberApi';
 
@@ -6,10 +8,31 @@ const AddNewTask = () => {
     const { data: projects } = useGetProjectsQuery()
     const { data: teams } = useGetTeamMemberQuery()
 
+    const [addTask, { isLoading, isSuccess }] = useAddTaskMutation()
+
     const [teamMember, setTeamMember] = useState({})
     const [project, setProject] = useState({})
     const [taskName, setTaskName] = useState("")
     const [deadline, setDeadline] = useState("")
+
+    const navigate = useNavigate()
+
+    const handleTeamNameChange = (e) => {
+        const tem = teams.find(t => t.name === e.target.value)
+        setTeamMember(tem)
+    }
+
+    const handleProjectNameChange = (e) => {
+        const proj = projects.find(p => p.projectName === e.target.value)
+        setProject(proj)
+    }
+
+    // const clearForm = () => {
+    //     setDeadline("")
+    //     setTaskName("")
+    //     setProject({})
+    //     setTeamMember({})
+    // }
 
 
     const handleSubmit = (event) => {
@@ -17,10 +40,14 @@ const AddNewTask = () => {
         const data = {
             teamMember, project, taskName, deadline
         }
-        console.log(data)
+        addTask(data)
+        // clearForm()
+        event.target.reset()
 
+    }
 
-
+    if (isSuccess) {
+        navigate("/")
     }
     return (
         <div className="container relative">
@@ -45,17 +72,17 @@ const AddNewTask = () => {
 
                         <div className="fieldContainer">
                             <label>Assign To</label>
-                            <select name="teamMember" id="lws-teamMember" required onChange={(e) => setTeamMember(e.target.value)}>
+                            <select name="teamMember" id="lws-teamMember" required onChange={handleTeamNameChange}>
                                 <option value="" hidden selected>Select team</option>
-                                {teams?.map(team => <option value={team}>{team?.name}</option>)}
+                                {teams?.map(team => <option value={team.name}>{team?.name}</option>)}
 
                             </select>
                         </div>
                         <div className="fieldContainer">
                             <label for="lws-projectName">Project Name</label>
-                            <select id="lws-projectName" name="projectName" required onChange={(e) => setProject(e.target.value)}>
+                            <select id="lws-projectName" name="projectName" required onChange={handleProjectNameChange}>
                                 <option value="" hidden selected>Select Project</option>
-                                {projects?.map(project => <option value={project}>{project?.projectName}</option>)}
+                                {projects?.map(project => <option value={project?.projectName}>{project?.projectName}</option>)}
 
                             </select>
                         </div>
@@ -66,7 +93,7 @@ const AddNewTask = () => {
                         </div>
 
                         <div className="text-right">
-                            <button type="submit" className="lws-submit">Save</button>
+                            <button type="submit" className="lws-submit" disabled={isLoading}>Save</button>
                         </div>
                     </form>
                 </div>
